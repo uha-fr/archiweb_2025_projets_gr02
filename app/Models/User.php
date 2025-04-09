@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,7 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -21,6 +20,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'phone_number',
+        'address',
+        'company_name',
+        'tax_id',
+        'preferences',
     ];
 
     /**
@@ -40,5 +45,32 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'preferences' => 'array',
     ];
+
+    /**
+     * Get the offers for the user.
+     */
+    public function offers()
+    {
+        return $this->hasMany(Offer::class);
+    }
+
+    /**
+     * Get the contracts for the user.
+     */
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class, 'buyer_id')
+                    ->orWhere('seller_id', $this->id);
+    }
+
+    /**
+     * Get the transactions for the user.
+     */
+    public function transactions()
+    {
+        return $this->hasManyThrough(Transaction::class, Contract::class, 'buyer_id')
+                    ->orWhere('seller_id', $this->id);
+    }
 }

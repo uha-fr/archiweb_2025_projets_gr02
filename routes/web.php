@@ -1,24 +1,33 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\WebController;
+use App\Http\Controllers\AuthWebController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
 */
 
-Route::get('/', function () {
-    return view('welcome');
+// Routes publiques
+Route::get('/', [WebController::class, 'home'])->name('home');
+Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthWebController::class, 'login']);
+Route::get('/register', [AuthWebController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthWebController::class, 'register']);
+
+// Routes protégées
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [WebController::class, 'dashboard'])->name('dashboard');
+    Route::get('/logout', [AuthWebController::class, 'logout'])->name('logout');
+    
+    // Offres
+    Route::get('/offers', [WebController::class, 'offers'])->name('offers.index');
+    Route::get('/offers/create', [WebController::class, 'offerCreate'])->name('offers.create');
+    Route::post('/offers', [WebController::class, 'offerStore'])->name('offers.store');
+    Route::get('/offers/{id}', [WebController::class, 'offerShow'])->name('offers.show');
+    
+    // Historique
+    Route::get('/history', [WebController::class, 'history'])->name('history');
 });
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
-
-require __DIR__.'/auth.php';

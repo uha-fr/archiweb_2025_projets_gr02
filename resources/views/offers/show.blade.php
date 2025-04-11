@@ -145,6 +145,7 @@
                         </div>
                     @endif
                 @elseif ($offer->status == 'active')
+                <div class="flex gap-1">
                     <!-- Options pour les autres utilisateurs -->
                     <form action="{{ route('contracts.store') }}" method="POST">
                         @csrf
@@ -153,6 +154,12 @@
                             {{ $offer->type == 'offer' ? 'Acheter' : 'Vendre' }}
                         </button>
                     </form>
+
+                    <a href="{{ route('chat', ['id' => $offer->user->id]) }}"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700">
+                        Contacter {{ $offer->type == 'offer' ? 'le vendeur' : "l'acheteur" }}
+                     </a>
+                </div>
                 @endif
             </div>
         </div>

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AuthWebController;
 
 /*
@@ -42,4 +43,7 @@ Route::post('/register', [AuthWebController::class, 'register']);
     
     // Historique
     Route::get('/history', [WebController::class, 'history'])->name('history');
+
+    // Messagerie
+    Route::get('/chat/{id}',[ChatController::class,'chat'])->name('chat');
 });

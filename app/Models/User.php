@@ -73,4 +73,16 @@ class User extends Authenticatable
         return $this->hasManyThrough(Transaction::class, Contract::class, 'buyer_id')
                     ->orWhere('seller_id', $this->id);
     }
+
+    /**
+     * Get the number of pending contracts where the user is the seller.
+     *
+     * @return int
+     */
+    public function pendingContractsAsSellerCount()
+    {
+        return Contract::where('seller_id', $this->id)
+                      ->where('status', 'pending')
+                      ->count();
+    }
 }

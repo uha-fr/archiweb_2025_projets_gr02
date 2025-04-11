@@ -68,6 +68,37 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                            <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">
+                                    Contrats en attente
+                                </dt>
+                                <dd>
+                                    <div class="text-lg font-medium text-gray-900">
+                                        {{ Auth::user()->pendingContractsAsSellerCount() }}
+                                    </div>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-4 sm:px-6">
+                    <div class="text-sm">
+                        <a href="{{ route('contracts.pending') }}" class="font-medium text-primary-600 hover:text-primary-500">
+                            Voir les contrats en attente
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Recent Offers -->
@@ -77,6 +108,7 @@
                 <a href="{{ route('offers.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700">
                     Créer une offre
                 </a>
+            </div>
             </div>
             <div class="mt-4 flex flex-col">
                 <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">

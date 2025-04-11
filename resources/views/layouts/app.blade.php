@@ -68,6 +68,15 @@
                                 <a href="{{ route('offers.index') }}" class="border-transparent text-gray-500 hover:border-primary-500 hover:text-primary-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                     Offres
                                 </a>
+                                <a href="{{ route('contracts.pending') }}" class="border-transparent text-gray-500 hover:border-primary-500 hover:text-primary-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                    Contrats en attente
+                                    @php
+                                        $pendingCount = Auth::user()->pendingContractsAsSellerCount();
+                                    @endphp
+                                    @if($pendingCount > 0)
+                                        <span class="ml-1 px-2 py-0.5 text-xs rounded-full bg-primary-100 text-primary-800">{{ $pendingCount }}</span>
+                                    @endif
+                                </a>
                                 <a href="{{ route('history') }}" class="border-transparent text-gray-500 hover:border-primary-500 hover:text-primary-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                     Historique
                                 </a>

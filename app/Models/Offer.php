@@ -24,6 +24,9 @@ class Offer extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the contracts for the offer.
+     */
     public function contracts()
     {
         return $this->hasMany(Contract::class);

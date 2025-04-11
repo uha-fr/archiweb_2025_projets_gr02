@@ -46,4 +46,5 @@ Route::post('/register', [AuthWebController::class, 'register']);
 
     // Messagerie
     Route::get('/chat/{id}',[ChatController::class,'chat'])->name('chat');
+    Route::post('/chat/{receiverId}',[ChatController::class,'send'])->name('chat.send');
 });

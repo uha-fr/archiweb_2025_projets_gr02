@@ -49,11 +49,11 @@
                                 <input type="number" step="0.01" name="max_price" id="max_price" value="{{ request('max_price') }}" class="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                             </div>
 
-                            <div class="col-span-6 sm:col-span-3 flex items-end">
+                            <div class="col-span-6 sm:col-span-3 flex items-end space-x-3">
                                 <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                                     Filtrer
                                 </button>
-                                <a href="{{ route('offers.index') }}" class="ml-3 inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                <a href="{{ route('offers.index') }}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                                     Réinitialiser
                                 </a>
                             </div>

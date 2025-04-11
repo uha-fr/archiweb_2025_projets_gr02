@@ -13,7 +13,7 @@
                 Plateforme d'échange d'électricité entre particuliers et entreprises. Vendez votre surplus d'électricité ou achetez de l'électricité à un prix avantageux.
             </p>
             <div class="mt-10 flex space-x-4">
-                <a href="{{ route('register') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-primary-700 bg-white hover:bg-primary-50">
+                <a href="{{ Auth::check() ? route('dashboard') : route('register') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-primary-700 bg-white hover:bg-primary-50">
                     Commencer
                 </a>
                 <a href="#how-it-works" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary-700 bg-opacity-60 hover:bg-opacity-70">
@@ -133,16 +133,24 @@
                 <span class="block text-primary-600">Inscrivez-vous gratuitement dès aujourd'hui.</span>
             </h2>
             <div class="mt-8 flex lg:mt-0 lg:flex-shrink-0">
-                <div class="inline-flex rounded-md shadow">
-                    <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">
-                        S'inscrire
-                    </a>
-                </div>
-                <div class="ml-3 inline-flex rounded-md shadow">
-                    <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-primary-600 bg-white hover:bg-primary-50">
-                        Se connecter
-                    </a>
-                </div>
+                @auth
+                    <div class="inline-flex rounded-md shadow">
+                        <a href="{{ route('dashboard') }}" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">
+                            Tableau de bord
+                        </a>
+                    </div>
+                @else
+                    <div class="inline-flex rounded-md shadow">
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700">
+                            S'inscrire
+                        </a>
+                    </div>
+                    <div class="ml-3 inline-flex rounded-md shadow">
+                        <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-primary-600 bg-white hover:bg-primary-50">
+                            Se connecter
+                        </a>
+                    </div>
+                @endauth
             </div>
         </div>
     </div>

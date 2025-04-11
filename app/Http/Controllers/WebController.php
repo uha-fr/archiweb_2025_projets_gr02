@@ -31,6 +31,8 @@ class WebController extends Controller
 
     public function offers(Request $request)
 {
+    $userId = Auth::id();
+    
     // Commencer avec toutes les offres actives
     $query = Offer::query()->where('status', 'active');
     
@@ -38,31 +40,115 @@ class WebController extends Controller
     $query->whereDoesntHave('contracts', function($q) {
         $q->whereIn('status', ['active', 'completed']);
     });
+    
+    // Exclure les offres pour lesquelles l'utilisateur a déjà créé un contrat en attente
+    $query->whereDoesntHave('contracts', function($q) use ($userId) {
+        $q->where('status', 'pending')
+          ->where(function($query) use ($userId) {
+              $query->where('buyer_id', $userId)
+                    ->orWhere('seller_id', $userId);
+          });
+    });
 
-    if ($request->has('type')) {
+    // Exclure les offres de l'utilisateur lui-même
+    $query->where('user_id', '!=', $userId);
+
+    // Filtrage par type (offre ou demande)
+    if ($request->has('type') && $request->type != '') {
         $query->where('type', $request->type);
     }
 
-    if ($request->has('min_quantity')) {
+    // Filtrage par quantité minimale
+    if ($request->has('min_quantity') && $request->min_quantity != '') {
         $query->where('quantity', '>=', $request->min_quantity);
     }
 
-    if ($request->has('max_quantity')) {
+    // Filtrage par quantité maximale
+    if ($request->has('max_quantity') && $request->max_quantity != '') {
         $query->where('quantity', '<=', $request->max_quantity);
     }
 
-    if ($request->has('min_price')) {
+    // Filtrage par prix minimum
+    if ($request->has('min_price') && $request->min_price != '') {
         $query->where('price', '>=', $request->min_price);
     }
 
-    if ($request->has('max_price')) {
+    // Filtrage par prix maximum
+    if ($request->has('max_price') && $request->max_price != '') {
         $query->where('price', '<=', $request->max_price);
     }
 
-    $offers = $query->paginate(10);
+    $offers = $query->with('user')->paginate(10)->withQueryString();
     
     return view('offers.index', compact('offers'));
 }
+
+   
+    
+    /**
+     * Supprimer une offre.
+     */
+    public function offerDestroy($id)
+{
+    $offer = Offer::findOrFail($id);
+    
+    // Vérifier que l'utilisateur est le propriétaire de l'offre
+    if ($offer->user_id != Auth::id()) {
+        return redirect()->route('offers.index')->with('error', 'Vous n\'êtes pas autorisé à supprimer cette offre.');
+    }
+    
+    // Vérifier si l'offre a des contrats actifs
+    $hasActiveContracts = $offer->contracts()->whereIn('status', ['active', 'completed'])->exists();
+    
+    if ($hasActiveContracts) {
+        return redirect()->route('offers.show', $offer->id)->with('error', 'Cette offre ne peut pas être supprimée car elle a des contrats actifs ou complétés.');
+    }
+    
+    // Supprimer les contrats en attente associés à cette offre
+    $offer->contracts()->where('status', 'pending')->delete();
+    
+    // Supprimer l'offre
+    $offer->delete();
+    
+    return redirect()->route('offers.index')->with('success', 'Offre supprimée avec succès!');
+}
+    
+    /**
+     * Mettre à jour une offre.
+     */
+    public function offerUpdate(Request $request, $id)
+    {
+        $offer = Offer::findOrFail($id);
+        
+        // Vérifier que l'utilisateur est le propriétaire de l'offre
+        if ($offer->user_id != Auth::id()) {
+            return redirect()->route('offers.index')->with('error', 'Vous n\'êtes pas autorisé à modifier cette offre.');
+        }
+        
+        // Vérifier si l'offre a des contrats actifs
+        $hasActiveContracts = $offer->contracts()->whereIn('status', ['active', 'completed'])->exists();
+        
+        if ($hasActiveContracts) {
+            return redirect()->route('offers.show', $offer->id)->with('error', 'Cette offre ne peut pas être modifiée car elle a des contrats actifs ou complétés.');
+        }
+        
+        $request->validate([
+            'status' => 'required|in:active,cancelled',
+            'quantity' => 'required|numeric|min:0',
+            'price' => 'required|numeric|min:0',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+        ]);
+        
+        $offer->status = $request->status;
+        $offer->quantity = $request->quantity;
+        $offer->price = $request->price;
+        $offer->start_time = $request->start_time;
+        $offer->end_time = $request->end_time;
+        $offer->save();
+        
+        return redirect()->route('offers.show', $offer->id)->with('success', 'Offre mise à jour avec succès!');
+    }
 
 
 
@@ -182,109 +268,31 @@ public function offerEdit($id)
  * @return \Illuminate\Http\Response
  */
 
- public function offerUpdate(Request $request, $id)
- {
-     $offer = Offer::findOrFail($id);
-     
-     // Vérifier que l'utilisateur est le propriétaire de l'offre
-     if ($offer->user_id != Auth::id()) {
-         return redirect()->route('offers.index')->with('error', 'Vous n\'êtes pas autorisé à modifier cette offre.');
-     }
-     
-     // Vérifier si l'offre a des contrats actifs
-     $hasActiveContracts = $offer->contracts()->whereIn('status', ['active', 'completed'])->exists();
-     
-     if ($hasActiveContracts) {
-         return redirect()->route('offers.show', $offer->id)->with('error', 'Cette offre ne peut pas être modifiée car elle a des contrats actifs ou complétés.');
-     }
-     
-     $request->validate([
-         'status' => 'required|in:active,cancelled',
-         'quantity' => 'required|numeric|min:0',
-         'price' => 'required|numeric|min:0',
-         'start_time' => 'required|date',
-         'end_time' => 'required|date|after:start_time',
-     ]);
-     
-     $offer->status = $request->status;
-     $offer->quantity = $request->quantity;
-     $offer->price = $request->price;
-     $offer->start_time = $request->start_time;
-     $offer->end_time = $request->end_time;
-     $offer->save();
-     
-     return redirect()->route('offers.show', $offer->id)->with('success', 'Offre mise à jour avec succès!');
- }
+ 
 
  public function offerToggleStatus(Request $request, $id)
- {
-     $offer = Offer::findOrFail($id);
-     
-     // Vérifier que l'utilisateur est le propriétaire de l'offre
-     if ($offer->user_id != Auth::id()) {
-         return redirect()->route('offers.index')->with('error', 'Vous n\'êtes pas autorisé à modifier cette offre.');
-     }
-     
-     // Vérifier si l'offre a des contrats actifs
-     $hasActiveContracts = $offer->contracts()->whereIn('status', ['active', 'completed'])->exists();
-     
-     if ($hasActiveContracts) {
-         return redirect()->route('offers.show', $offer->id)->with('error', 'Cette offre ne peut pas être modifiée car elle a des contrats actifs ou complétés.');
-     }
-     
-     // Basculer le statut
-     $offer->status = ($offer->status == 'active') ? 'cancelled' : 'active';
-     $offer->save();
-     
-     return redirect()->back()->with('success', 'Statut de l\'offre modifié avec succès!');
- }
-
-/**
- * Supprimer une offre.
- 
- */
-public function offerDestroy($id)
 {
     $offer = Offer::findOrFail($id);
     
     // Vérifier que l'utilisateur est le propriétaire de l'offre
     if ($offer->user_id != Auth::id()) {
-        return redirect()->route('offers.index')->with('error', 'Vous n\'êtes pas autorisé à supprimer cette offre.');
+        return redirect()->route('offers.index')->with('error', 'Vous n\'êtes pas autorisé à modifier cette offre.');
     }
     
     // Vérifier si l'offre a des contrats actifs
     $hasActiveContracts = $offer->contracts()->whereIn('status', ['active', 'completed'])->exists();
     
     if ($hasActiveContracts) {
-        return redirect()->route('offers.show', $offer->id)->with('error', 'Cette offre ne peut pas être supprimée car elle a des contrats actifs ou complétés.');
+        return redirect()->route('offers.show', $offer->id)->with('error', 'Cette offre ne peut pas être modifiée car elle a des contrats actifs ou complétés.');
     }
     
-    // Supprimer les contrats en attente associés à cette offre
-    $offer->contracts()->where('status', 'pending')->delete();
+    // Basculer le statut
+    $offer->status = ($offer->status == 'active') ? 'cancelled' : 'active';
+    $offer->save();
     
-    // Supprimer l'offre
-    $offer->delete();
-    
-    return redirect()->route('offers.index')->with('success', 'Offre supprimée avec succès!');
+    return redirect()->back()->with('success', 'Statut de l\'offre modifié avec succès!');
 }
 
-/**
- * Afficher la liste des contrats en attente de validation.
- *
- * @return \Illuminate\Http\Response
- */
-public function pendingContracts()
-{
-    $user = Auth::user();
-    // Récupérer les contrats où l'utilisateur est vendeur et le statut est en attente
-    $pendingContracts = Contract::where('seller_id', $user->id)
-                               ->where('status', 'pending')
-                               ->with(['offer', 'buyer'])
-                               ->latest()
-                               ->paginate(10);
-    
-    return view('contracts.pending', compact('pendingContracts'));
-}
 
 /**
  * Accepter un contrat en attente.
@@ -346,16 +354,52 @@ public function contractReject($id)
     
     return redirect()->route('contracts.pending')->with('success', 'Contrat refusé avec succès.');
 }
-
-
-
-/**
- * Changer rapidement le statut d'une offre.
- *
- * @param  \Illuminate\Http\Request  $request
- * @param  int  $id
- * @return \Illuminate\Http\Response
- */
-
+public function pendingContracts()
+{
+    $user = Auth::user();
+    // Récupérer les contrats où l'utilisateur est vendeur et le statut est en attente
+    $pendingContracts = Contract::where('seller_id', $user->id)
+                               ->where('status', 'pending')
+                               ->with(['offer', 'buyer'])
+                               ->latest()
+                               ->paginate(10);
+    
+    return view('contracts.pending', compact('pendingContracts'));
+}
+public function myPendingContracts()
+{
+    $user = Auth::user();
+    
+    // Récupérer les contrats où l'utilisateur est acheteur et le statut est en attente
+    $pendingContractsAsBuyer = Contract::where('buyer_id', $user->id)
+                             ->where('status', 'pending')
+                             ->with(['offer', 'seller'])
+                             ->latest()
+                             ->get();
+    
+    // Récupérer les contrats où l'utilisateur est vendeur et le statut est en attente
+    $pendingContractsAsSeller = Contract::where('seller_id', $user->id)
+                               ->where('status', 'pending')
+                               ->with(['offer', 'buyer'])
+                               ->latest()
+                               ->get();
+    
+    // Combiner les deux collections
+    $pendingContracts = $pendingContractsAsBuyer->merge($pendingContractsAsSeller)->sortByDesc('created_at');
+    
+    // Paginer manuellement
+    $perPage = 10;
+    $currentPage = request()->get('page', 1);
+    $currentItems = $pendingContracts->forPage($currentPage, $perPage);
+    $paginatedContracts = new \Illuminate\Pagination\LengthAwarePaginator(
+        $currentItems, 
+        $pendingContracts->count(), 
+        $perPage, 
+        $currentPage,
+        ['path' => request()->url(), 'query' => request()->query()]
+    );
+    
+    return view('contracts.my-pending', compact('paginatedContracts'));
+}
 
 }

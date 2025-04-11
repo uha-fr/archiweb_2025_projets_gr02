@@ -38,6 +38,7 @@ Route::post('/register', [AuthWebController::class, 'register']);
     Route::get('/contracts/pending', [WebController::class, 'pendingContracts'])->name('contracts.pending');
     Route::post('/contracts/{id}/accept', [WebController::class, 'contractAccept'])->name('contracts.accept');
     Route::post('/contracts/{id}/reject', [WebController::class, 'contractReject'])->name('contracts.reject');
+    Route::get('/contracts/{id}', [WebController::class, 'contractShow'])->name('contracts.show');
     
     // Historique
     Route::get('/history', [WebController::class, 'history'])->name('history');

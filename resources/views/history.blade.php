@@ -90,7 +90,7 @@
                                             {{ $contract->created_at->format('d/m/Y H:i') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <a href="#" class="text-primary-600 hover:text-primary-900">Détails</a>
+                                            <a href="{{ route('contracts.show', $contract->id) }}" class="text-primary-600 hover:text-primary-900">Détails</a>
                                         </td>
                                     </tr>
                                 @empty

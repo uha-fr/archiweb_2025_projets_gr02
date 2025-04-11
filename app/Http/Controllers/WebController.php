@@ -354,6 +354,17 @@ public function contractReject($id)
     
     return redirect()->route('contracts.pending')->with('success', 'Contrat refusé avec succès.');
 }
+public function contractShow($id)
+{
+    $contract = Contract::with(['offer', 'buyer', 'seller'])->findOrFail($id);
+    
+    // Vérifier que l'utilisateur est autorisé à voir ce contrat
+    if ($contract->buyer_id != Auth::id() && $contract->seller_id != Auth::id()) {
+        return redirect()->route('history')->with('error', 'Vous n\'êtes pas autorisé à voir ce contrat.');
+    }
+    
+    return view('contracts.show', compact('contract'));
+}
 public function pendingContracts()
 {
     $user = Auth::user();

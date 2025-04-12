@@ -54,7 +54,7 @@
 
                                 <div class="col-span-6 sm:col-span-3">
                                     <label for="start_time" class="block text-sm font-medium text-gray-700">Date de début</label>
-                                    <input type="datetime-local" name="start_time" id="start_time" class="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" value="{{ date('Y-m-d\TH:i', strtotime($offer->start_time)) }}">
+                                    <input type="datetime-local" name="start_time" id="start_time" class="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" value="{{ date('Y-m-d', strtotime($offer->start_time)) }}">
                                     @error('start_time')
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
@@ -62,7 +62,7 @@
 
                                 <div class="col-span-6 sm:col-span-3">
                                     <label for="end_time" class="block text-sm font-medium text-gray-700">Date de fin</label>
-                                    <input type="datetime-local" name="end_time" id="end_time" class="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" value="{{ date('Y-m-d\TH:i', strtotime($offer->end_time)) }}">
+                                    <input type="datetime-local" name="end_time" id="end_time" class="mt-1 focus:ring-primary-500 focus:border-primary-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" value="{{ date('Y-m-d', strtotime($offer->end_time)) }}">
                                     @error('end_time')
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                     @enderror

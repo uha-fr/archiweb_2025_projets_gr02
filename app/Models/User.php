@@ -26,7 +26,8 @@ class User extends Authenticatable
         'company_name',
         'tax_id',
         'preferences',
-        
+        'profile_photo',
+        'bio',
     ];
 
     /**
@@ -87,4 +88,33 @@ class User extends Authenticatable
                       ->count();
     }
 
+    /**
+     * Get the number of pending contracts for the user (both as buyer and seller).
+     *
+     * @return int
+     */
+    public function pendingContractsCount()
+    {
+        return Contract::where(function($query) {
+                    $query->where('buyer_id', $this->id)
+                          ->orWhere('seller_id', $this->id);
+                })
+                ->where('status', 'pending')
+                ->count();
+    }
+
+    /**
+     * Get the profile photo URL.
+     *
+     * @return string
+     */
+    public function getProfilePhotoUrlAttribute()
+    {
+        if ($this->profile_photo) {
+            return asset('storage/' . $this->profile_photo);
+        }
+        
+        // Retourne une image par défaut basée sur la première lettre du nom
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
+    }
 }

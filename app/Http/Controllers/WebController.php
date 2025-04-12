@@ -506,4 +506,90 @@ public function myPendingContracts()
     return view('contracts.my-pending', compact('paginatedContracts'));
 }
 
+/**
+ * Afficher le profil de l'utilisateur.
+ *
+ * @return \Illuminate\Http\Response
+ */
+public function profile()
+{
+    $user = Auth::user();
+    return view('profile.show', compact('user'));
+}
+
+/**
+ * Afficher le formulaire d'édition du profil.
+ *
+ * @return \Illuminate\Http\Response
+ */
+public function profileEdit()
+{
+    $user = Auth::user();
+    return view('profile.edit', compact('user'));
+}
+
+/**
+ * Mettre à jour le profil de l'utilisateur.
+ *
+ * @param  \Illuminate\Http\Request  $request
+ * @return \Illuminate\Http\Response
+ */
+public function profileUpdate(Request $request)
+{
+    $user = Auth::user();
+    
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+        'phone_number' => 'nullable|string|max:20',
+        'address' => 'nullable|string|max:500',
+        'company_name' => $user->role == 'company' ? 'required|string|max:255' : 'nullable|string|max:255',
+        'tax_id' => $user->role == 'company' ? 'required|string|max:50' : 'nullable|string|max:50',
+        'bio' => 'nullable|string|max:1000',
+        'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+    
+    // Mise à jour des informations de base
+    $user->name = $request->name;
+    $user->email = $request->email;
+    $user->phone_number = $request->phone_number;
+    $user->address = $request->address;
+    $user->company_name = $request->company_name;
+    $user->tax_id = $request->tax_id;
+    $user->bio = $request->bio;
+    
+    // Traitement de la photo de profil
+    if ($request->hasFile('profile_photo')) {
+        // Supprimer l'ancienne photo si elle existe
+        if ($user->profile_photo) {
+            Storage::disk('public')->delete($user->profile_photo);
+        }
+        
+        // Stocker la nouvelle photo
+        $path = $request->file('profile_photo')->store('profile-photos', 'public');
+        $user->profile_photo = $path;
+    }
+    
+    $user->save();
+    
+    return redirect()->route('profile')->with('success', 'Profil mis à jour avec succès!');
+}
+
+/**
+ * Supprimer la photo de profil de l'utilisateur.
+ *
+ * @return \Illuminate\Http\Response
+ */
+public function profilePhotoDelete()
+{
+    $user = Auth::user();
+    
+    if ($user->profile_photo) {
+        Storage::disk('public')->delete($user->profile_photo);
+        $user->profile_photo = null;
+        $user->save();
+    }
+    
+    return redirect()->route('profile.edit')->with('success', 'Photo de profil supprimée avec succès!');
+}
 }

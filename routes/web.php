@@ -56,10 +56,9 @@ Route::post('/register', [AuthWebController::class, 'register']);
     Route::get('/solde', [WebController::class, 'solde'])->name('solde');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
     
-    
-
-
-
-
-
+    // Profil
+    Route::get('/profile', [WebController::class, 'profile'])->name('profile');
+    Route::get('/profile/edit', [WebController::class, 'profileEdit'])->name('profile.edit');
+    Route::put('/profile', [WebController::class, 'profileUpdate'])->name('profile.update');
+    Route::delete('/profile/photo', [WebController::class, 'profilePhotoDelete'])->name('profile.photo.delete');
 });

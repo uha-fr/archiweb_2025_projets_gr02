@@ -14,10 +14,16 @@ class Transaction extends Model
         'quantity',
         'price',
         'transaction_time',
+        'user_id',
     ];
 
     public function contract()
     {
         return $this->belongsTo(Contract::class);
+    }
+    
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

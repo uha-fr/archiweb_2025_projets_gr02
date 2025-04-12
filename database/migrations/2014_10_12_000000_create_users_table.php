@@ -23,6 +23,8 @@ class CreateUsersTable extends Migration
             $table->rememberToken();
             $table->timestamps();
             $table->string('role')->default('user');
+            $table->float('kwh_balance')->default(0);
+            $table->decimal('wallet_balance', 10, 2)->default(0);
         });
     }
 
@@ -34,5 +36,6 @@ class CreateUsersTable extends Migration
     public function down()
     {
         Schema::dropIfExists('users');
+
     }
 }

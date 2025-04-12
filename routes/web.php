@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\AuthWebController;
+use App\Http\Controllers\TransactionController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -47,4 +50,16 @@ Route::post('/register', [AuthWebController::class, 'register']);
     // Messagerie
     Route::get('/chat/{id}',[ChatController::class,'chat'])->name('chat');
     Route::post('/chat/{receiverId}',[ChatController::class,'send'])->name('chat.send');
+
+    // Compteur et Solde
+    Route::get('/compteur', [WebController::class, 'compteur'])->name('compteur');  
+    Route::get('/solde', [WebController::class, 'solde'])->name('solde');
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    
+    
+
+
+
+
+
 });

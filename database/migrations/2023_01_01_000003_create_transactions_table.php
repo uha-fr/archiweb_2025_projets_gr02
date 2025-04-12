@@ -19,6 +19,8 @@ class CreateTransactionsTable extends Migration
             $table->float('quantity');
             $table->decimal('price', 8, 2);
             $table->dateTime('transaction_time');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->timestamps();
         });
     }
@@ -31,5 +33,6 @@ class CreateTransactionsTable extends Migration
     public function down()
     {
         Schema::dropIfExists('transactions');
+        
     }
 }

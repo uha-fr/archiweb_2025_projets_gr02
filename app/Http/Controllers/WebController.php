@@ -25,8 +25,10 @@ class WebController extends Controller
         // Statistics
         $activeOffers = $user->offers()->where('status', 'active')->count();
         $completedContracts = $user->contracts()->where('status', 'completed')->count();
-        
-        return view('dashboard', compact('user', 'offers', 'contracts', 'activeOffers', 'completedContracts'));
+        $kwhBalance = $user->kwh_balance;
+        $walletBalance = $user->wallet_balance;
+
+        return view('dashboard', compact('user', 'offers', 'contracts', 'activeOffers', 'completedContracts','kwhBalance', 'walletBalance'));
     }
 
     public function offers(Request $request)
@@ -303,29 +305,120 @@ public function offerEdit($id)
 public function contractAccept($id)
 {
     $contract = Contract::findOrFail($id);
-    
-    // Vérifier que l'utilisateur est bien le vendeur
+
+    // Vérification de l'autorisation de l'utilisateur
     if ($contract->seller_id != Auth::id()) {
         return redirect()->route('contracts.pending')->with('error', 'Vous n\'êtes pas autorisé à valider ce contrat.');
     }
-    
-    // Vérifier que le contrat est bien en attente
+
+    // Vérification du statut du contrat
     if ($contract->status != 'pending') {
         return redirect()->route('contracts.pending')->with('error', 'Ce contrat ne peut plus être validé.');
     }
-    
-    DB::transaction(function () use ($contract) {
-        // Mettre à jour le statut du contrat
+
+    // Récupération des informations nécessaires
+    $offer = $contract->offer;
+    $seller = $contract->seller;
+    $buyer = $contract->buyer;
+    $quantity = $offer->quantity;
+    $price = $offer->price;
+    $total = $quantity * $price;
+
+    // Vérification des soldes
+    if ($seller->kwh_balance < $quantity) {
+        return redirect()->route('contracts.pending')->with('error', 'Solde insuffisant en kWh pour finaliser le contrat.');
+    }
+
+    if ($buyer->wallet_balance < $total) {
+        return redirect()->route('contracts.pending')->with('error', 'Solde insuffisant sur le portefeuille de l\'acheteur.');
+    }
+
+    // Démarrage de la transaction
+    DB::transaction(function () use ($contract, $offer, $seller, $buyer, $quantity, $price, $total) {
+        // Mise à jour du contrat et de l'offre
         $contract->status = 'active';
         $contract->save();
-        
-        // Mettre à jour le statut de l'offre pour qu'elle ne soit plus visible
-        $offer = $contract->offer;
+
         $offer->status = 'matched';
         $offer->save();
+
+        // Mise à jour des soldes
+        $seller->kwh_balance -= $quantity;
+        $seller->wallet_balance += $total;
+        $buyer->kwh_balance += $quantity;
+        $buyer->wallet_balance -= $total;
+
+        // Sauvegarde des utilisateurs
+        $seller->save();
+        $buyer->save();
+
+        // Enregistrement de la transaction
+        Transaction::create([
+            'contract_id' => $contract->id,
+            'quantity' => $quantity,
+            'price' => $price,
+            'transaction_time' => now(),
+        ]);
     });
-    
+
+    // Redirection avec message de succès
     return redirect()->route('contracts.pending')->with('success', 'Contrat accepté avec succès.');
+}
+
+public function solde()
+{
+    $user = Auth::user(); // Récupérer l'utilisateur connecté
+    
+    // Récupérer les informations sur le solde
+    $kwhBalance = $user->kwh_balance;
+    $walletBalance = $user->wallet_balance;
+    
+    // Retourner la vue pour afficher le solde
+    return view('solde', compact('kwhBalance', 'walletBalance'));
+}
+public function compteur()
+{
+    $user = Auth::user(); // Récupérer l'utilisateur connecté
+    
+    // Compter le nombre d'offres créées par l'utilisateur
+    $offresCount = $user->offers()->count();
+    
+    // Compter le nombre de contrats impliquant l'utilisateur (en tant qu'acheteur ou vendeur)
+    $contratsCount = $user->contracts()->count();
+    
+    // Retourner la vue pour afficher le compteur
+    return view('compteur', compact('offresCount', 'contratsCount'));
+}
+// Transactions KWh
+public function transactionsKwh()
+{
+    $user = Auth::user();
+    
+    // Récupérer les transactions de KWh de l'utilisateur
+    $transactions = Transaction::whereHas('contract', function($query) use ($user) {
+        $query->where('buyer_id', $user->id)
+              ->orWhere('seller_id', $user->id);
+    })->with(['contract', 'contract.buyer', 'contract.seller'])
+      ->latest()
+      ->paginate(10);
+    
+    return view('transactions.kwh', compact('transactions'));
+}
+
+// Transactions Solde
+public function transactionsSolde()
+{
+    $user = Auth::user();
+    
+    // Récupérer les transactions liées au solde de l'utilisateur
+    $transactions = Transaction::whereHas('contract', function($query) use ($user) {
+        $query->where('buyer_id', $user->id)
+              ->orWhere('seller_id', $user->id);
+    })->with(['contract', 'contract.buyer', 'contract.seller'])
+      ->latest()
+      ->paginate(10);
+    
+    return view('transactions.solde', compact('transactions'));
 }
 
 /**

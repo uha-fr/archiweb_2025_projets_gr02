@@ -12,6 +12,8 @@ use App\Models\User;
 use App\Models\Conversation;
 use App\Models\Message;
 
+use App\Notifications\NewMessageNotification;
+
 class ChatController extends Controller
 {
 
@@ -25,6 +27,9 @@ class ChatController extends Controller
             "sender_id" => $sender->id,
             "content" => $request->get('content'),
         ]);
+        
+        // Notifier le destinataire
+        $receiver->notify(new NewMessageNotification($message));
 
         return back();
     }

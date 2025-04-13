@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+   
     <!-- Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -80,6 +80,78 @@
                                 <a href="{{ route('chatcenter') }}" class="border-transparent text-gray-500 hover:border-primary-500 hover:text-primary-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                     Messagerie
                                 </a>
+
+
+                        <!-- Notification -->
+                        <script src="//unpkg.com/alpinejs" defer></script>
+
+                        @php
+                            $notifications = auth()->user()->unreadNotifications;
+                        @endphp
+
+                        <!-- Cloche + Dropdown -->
+                        <div x-data="{ open: false }" class="relative ml-4">
+                            <!-- Cloche -->
+                            <button @click="open = !open" class="relative text-gray-600 hover:text-primary-600 focus:outline-none mt-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11
+                                        a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C8.67
+                                        6.165 8 7.388 8 8.75V14.158c0 .538-.214 1.055-.595
+                                        1.437L6 17h5m4 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+
+                                @if($notifications->count() > 0)
+                                    <span class="absolute -top-1 -right-1 text-xs bg-red-600 text-white rounded-full px-1.5 py-0.5 leading-none font-bold shadow">
+                                        {{ $notifications->count() }}
+                                    </span>
+                                @endif
+                            </button>
+                            
+                            <!-- Dropdown -->
+                            <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                                @forelse($notifications as $notification)
+                                    <a href="{{ 
+                                        $notification->data['type'] === 'message' 
+                                        ? $notification->data['route'] 
+                                        : '#' 
+                                    }}" 
+                                    class="block px-4 py-2 text-sm text-gray-700 border-b hover:bg-gray-50"
+                                    onclick="event.preventDefault(); document.getElementById('mark-as-read-{{ $notification->id }}').submit();">
+                                        @if ($notification->data['type'] === 'message')
+                                            Vous avez reçu un message de <strong>{{ $notification->data['sender_name'] }}</strong>
+                                        @else
+                                            Nouvelle notification de <strong>{{ $notification->data['sender_name'] ?? 'Inconnu' }}</strong>
+                                        @endif
+                                    </a>
+
+                                    <!-- Formulaire pour marquer la notification comme lue -->
+                                    <form id="mark-as-read-{{ $notification->id }}" action="{{ route('notifications.mark-read', $notification->id) }}" method="POST" style="display: none;">
+                                        @csrf
+                                    </form>
+
+                                    <!-- Bouton pour marquer la notification comme lue -->
+                                    <form method="POST" action="{{ route('notifications.mark-read', $notification->id) }}">
+                                        @csrf
+                                        <button type="submit" class="text-xs text-blue-600 hover:bg-gray-100">
+                                            Marquer comme lu
+                                        </button>
+                                    </form>
+                                @empty
+                                    <div class="px-4 py-2 text-sm text-gray-500">
+                                        Aucune notification
+                                    </div>
+                                @endforelse
+                            </div>
+                            
+                       
+
+                         </div>
+
+
+
+
                             @endauth
                         </div>
                     </div>
@@ -299,3 +371,5 @@
     </script>
 </body>
 </html>
+
+

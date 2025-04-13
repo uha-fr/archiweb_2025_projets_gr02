@@ -68,5 +68,12 @@ Route::post('/register', [AuthWebController::class, 'register']);
     // Public profil
     Route::get('/publicprofile/{user}', [WebController::class, 'publicProfile'])->name('publicProfile');
 
+    // Notifications
+    Route::post('/notifications/{notification}/mark-read', function ($notificationId) {
+      $notification = auth()->user()->notifications()->findOrFail($notificationId);
+      $notification->markAsRead(); 
+      return back(); 
+  })->name('notifications.mark-read');
+  
 
 });

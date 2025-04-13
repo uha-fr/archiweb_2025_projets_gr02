@@ -14,21 +14,6 @@ use App\Models\Message;
 
 class ChatController extends Controller
 {
-    public function chat($id)
-    {
-       $receiver = User::findOrFail($id);
-       $sender = Auth::user();
-
-       $messages = Message::where('receiver_id',"=",$receiver->id)->where('sender_id',"=",$sender->id)->orWhere('sender_id',"=",$receiver->id)->where('receiver_id',$sender->id)->get();
-      //  dd($messages);
-
-       return view('chat',[
-            'sender' => $sender,
-            'receiver' => $receiver,
-            'messages' => $messages
-       ]);
-
-    }
 
     public function send(Request $request, $receiverId)
     {
@@ -43,4 +28,41 @@ class ChatController extends Controller
 
         return back();
     }
+
+public function chatcenter($id = null)
+{
+    $user = Auth::user();
+
+    // Récupérer toutes les conversations 
+    $conversations = Message::where('sender_id', $user->id)
+        ->orWhere('receiver_id', $user->id)
+        ->with(['sender', 'receiver'])
+        ->get()
+        ->map(function ($message) use ($user) {
+            return $message->sender_id === $user->id ? $message->receiver : $message->sender;
+        })
+        ->unique('id')
+        ->values();
+
+    $messages = [];
+    $receiver = null;
+
+    if ($id) 
+    {
+        $receiver = User::findOrFail($id);
+        $messages = Message::where(function ($q) use ($user, $receiver) {
+            $q->where('sender_id', $user->id)->where('receiver_id', $receiver->id);
+        })->orWhere(function ($q) use ($user, $receiver) {
+            $q->where('sender_id', $receiver->id)->where('receiver_id', $user->id);
+        })->get();
+    }
+
+    $users = $conversations;
+
+    return view('chatcenter', compact('user', 'conversations', 'messages', 'receiver', 'users'));
+}
+
+
+
+
 }

@@ -159,7 +159,7 @@
                         </button>
                     </form>
 
-                    <a href="{{ route('chat', ['id' => $offer->user->id]) }}"
+                    <a href="{{ route('chat.with', ['id' => $offer->user->id]) }}"
                         class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700">
                         Contacter {{ $offer->type == 'offer' ? 'le vendeur' : "l'acheteur" }}
                      </a>

@@ -47,9 +47,12 @@ Route::post('/register', [AuthWebController::class, 'register']);
     // Historique
     Route::get('/history', [WebController::class, 'history'])->name('history');
 
-    // Messagerie
-    Route::get('/chat/{id}',[ChatController::class,'chat'])->name('chat');
-    Route::post('/chat/{receiverId}',[ChatController::class,'send'])->name('chat.send');
+    // Centre de messagerie
+    Route::get('/chat', [ChatController::class, 'chatcenter'])->name('chatcenter');
+    Route::get('/chat/user/{id}', [ChatController::class, 'chatcenter'])->name('chat.with');
+    Route::post('/chat/{id}', [ChatController::class, 'send'])->name('chat.send');
+
+
 
     // Compteur et Solde
     Route::get('/compteur', [WebController::class, 'compteur'])->name('compteur');  

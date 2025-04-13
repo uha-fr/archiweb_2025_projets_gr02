@@ -61,4 +61,9 @@ Route::post('/register', [AuthWebController::class, 'register']);
     Route::get('/profile/edit', [WebController::class, 'profileEdit'])->name('profile.edit');
     Route::put('/profile', [WebController::class, 'profileUpdate'])->name('profile.update');
     Route::delete('/profile/photo', [WebController::class, 'profilePhotoDelete'])->name('profile.photo.delete');
+
+    // Public profil
+    Route::get('/publicprofile/{user}', [WebController::class, 'publicProfile'])->name('publicProfile');
+
+
 });

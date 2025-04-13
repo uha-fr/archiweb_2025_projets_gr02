@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Offer;
 use App\Models\Contract;
 use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -592,4 +593,12 @@ public function profilePhotoDelete()
     
     return redirect()->route('profile.edit')->with('success', 'Photo de profil supprimée avec succès!');
 }
+
+
+public function publicProfile(User $user)
+{
+    return view('publicprofile', compact('user'));
+}
+
+
 }

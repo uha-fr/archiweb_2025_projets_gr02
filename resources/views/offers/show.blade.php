@@ -41,9 +41,13 @@
                         <dt class="text-sm font-medium text-gray-500">
                             Utilisateur
                         </dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            {{ $offer->user->name }} ({{ $offer->user->role == 'individual' ? 'Particulier' : 'Entreprise' }})
-                        </dd>
+                      
+                        <a href="{{ route('publicProfile', ['user' => $offer->user->id]) }}" class="flex items-center text-gray-700 mr-4 hover:text-primary-600">
+                            <img class="h-8 w-8 rounded-full object-cover mr-2" src="{{ $offer->user->profile_photo_url }}" alt="{{ $offer->user->name }}">
+                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                {{ $offer->user->name }} ({{ $offer->user->role == 'individual' ? 'Particulier' : 'Entreprise' }})
+                            </dd>
+                        </a>
                     </div>
                     <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">

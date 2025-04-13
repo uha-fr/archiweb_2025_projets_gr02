@@ -122,7 +122,7 @@
                                         @if ($notification->data['type'] === 'message')
                                             Vous avez reçu un message de <strong>{{ $notification->data['sender_name'] }}</strong>
                                         @elseif($notification->data['type']==='contract')
-                                            Vous avez reçu une nouvelle demande de contrat.</strong>
+                                            {{ $notification->data['content'] }}</strong>
                                         @endif
                                     </a>
 

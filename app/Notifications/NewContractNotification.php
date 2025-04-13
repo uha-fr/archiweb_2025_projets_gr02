@@ -12,16 +12,16 @@ use App\Models\Contract;
 class NewContractNotification extends Notification
 {
     use Queueable;
-    protected $contract;
+    protected $content;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($content)
     {
-        //
+        $this->content = $content;
     }
 
     /**
@@ -66,7 +66,8 @@ class NewContractNotification extends Notification
     {
         return [
             'type' => 'contract', 
-             'route' => route('contracts.pending'), 
+            'content' => $this->content,
+            'route' => route('contracts.pending'), 
         ];
     }
 }

@@ -237,7 +237,7 @@ class WebController extends Controller
             $contract->save();
 
             // Notifier l'utilisateur
-            $offer->User::find($offer->user_id)->notify(new NewContractNotification());
+            $offer->User::find($offer->user_id)->notify(new NewContractNotification("Vous avez une nouvelle proposition de contrat."));
 
 
             // Ne pas changer le statut de l'offre pour qu'elle reste visible dans la liste
@@ -367,6 +367,9 @@ public function contractAccept($id)
         ]);
     });
 
+    // Notifier
+    $offer->User::find($offer->user_id)->notify(new NewContractNotification("Vous avez un nouveau contrat accepté"));
+
     // Redirection avec message de succès
     return redirect()->route('contracts.pending')->with('success', 'Contrat accepté avec succès.');
 }
@@ -450,7 +453,10 @@ public function contractReject($id)
     // Mettre à jour le statut du contrat
     $contract->status = 'cancelled';
     $contract->save();
-    
+
+    // Notifier
+    $contract->buyer->notify(new NewContractNotification("Vous avez un nouveau contrat refusé"));
+
     return redirect()->route('contracts.pending')->with('success', 'Contrat refusé avec succès.');
 }
 public function contractShow($id)

@@ -6,6 +6,7 @@ use App\Models\Offer;
 use App\Models\Contract;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Notifications\NewContractNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -201,49 +202,53 @@ class WebController extends Controller
     
     
     public function contractStore(Request $request)
-{
-    $request->validate([
-        'offer_id' => 'required|exists:offers,id',
-    ]);
+    {
+        $request->validate([
+            'offer_id' => 'required|exists:offers,id',
+        ]);
 
-    $offer = Offer::findOrFail($request->offer_id);
+        $offer = Offer::findOrFail($request->offer_id);
 
-    if ($offer->status !== 'active') {
-        return redirect()->back()->with('error', 'Cette offre n\'est plus disponible.');
-    }
-
-    // Vérifier que l'utilisateur ne crée pas un contrat avec sa propre offre
-    if ($offer->user_id == Auth::id()) {
-        return redirect()->back()->with('error', 'Vous ne pouvez pas créer un contrat avec votre propre offre.');
-    }
-
-    $contract = DB::transaction(function () use ($offer, $request) {
-        $contract = new Contract();
-        $contract->offer_id = $offer->id;
-        
-        // Déterminer qui est l'acheteur et qui est le vendeur
-        if ($offer->type == 'offer') {
-            // Si c'est une offre de vente, l'utilisateur actuel est l'acheteur
-            $contract->buyer_id = Auth::id();
-            $contract->seller_id = $offer->user_id;
-        } else {
-            // Si c'est une demande d'achat, l'utilisateur actuel est le vendeur
-            $contract->seller_id = Auth::id();
-            $contract->buyer_id = $offer->user_id;
+        if ($offer->status !== 'active') {
+            return redirect()->back()->with('error', 'Cette offre n\'est plus disponible.');
         }
-        
-        $contract->status = 'pending';
-        $contract->save();
 
-        // Ne pas changer le statut de l'offre pour qu'elle reste visible dans la liste
-        // L'offre reste active et peut être utilisée pour d'autres contrats
+        // Vérifier que l'utilisateur ne crée pas un contrat avec sa propre offre
+        if ($offer->user_id == Auth::id()) {
+            return redirect()->back()->with('error', 'Vous ne pouvez pas créer un contrat avec votre propre offre.');
+        }
 
-        return $contract;
-    });
+        $contract = DB::transaction(function () use ($offer, $request) {
+            $contract = new Contract();
+            $contract->offer_id = $offer->id;
+            
+            // Déterminer qui est l'acheteur et qui est le vendeur
+            if ($offer->type == 'offer') {
+                // Si c'est une offre de vente, l'utilisateur actuel est l'acheteur
+                $contract->buyer_id = Auth::id();
+                $contract->seller_id = $offer->user_id;
+            } else {
+                // Si c'est une demande d'achat, l'utilisateur actuel est le vendeur
+                $contract->seller_id = Auth::id();
+                $contract->buyer_id = $offer->user_id;
+            }
+            
+            $contract->status = 'pending';
+            $contract->save();
 
-    // Rediriger vers l'historique avec un message de succès
-    return redirect()->route('history')->with('success', 'Contrat créé avec succès. Attendez la confirmation de l\'autre partie.');
-}
+            // Notifier l'utilisateur
+            $offer->User::find($offer->user_id)->notify(new NewContractNotification());
+
+
+            // Ne pas changer le statut de l'offre pour qu'elle reste visible dans la liste
+            // L'offre reste active et peut être utilisée pour d'autres contrats
+
+            return $contract;
+        });
+
+        // Rediriger vers l'historique avec un message de succès
+        return redirect()->route('history')->with('success', 'Contrat créé avec succès. Attendez la confirmation de l\'autre partie.');
+    }
 
 /**
  * Afficher le formulaire de modification d'une offre.

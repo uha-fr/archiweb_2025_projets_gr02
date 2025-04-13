@@ -121,8 +121,8 @@
                                     onclick="event.preventDefault(); document.getElementById('mark-as-read-{{ $notification->id }}').submit();">
                                         @if ($notification->data['type'] === 'message')
                                             Vous avez reçu un message de <strong>{{ $notification->data['sender_name'] }}</strong>
-                                        @else
-                                            Nouvelle notification de <strong>{{ $notification->data['sender_name'] ?? 'Inconnu' }}</strong>
+                                        @elseif($notification->data['type']==='contract')
+                                            Vous avez reçu une nouvelle demande de contrat.</strong>
                                         @endif
                                     </a>
 

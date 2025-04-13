@@ -257,7 +257,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+    
 
         <!-- Recent Contracts -->
         <div class="mt-8">
@@ -357,6 +357,9 @@
                 </div>
             </div>
         </div>
+
+    </div>
+
     </div>
 </div>
 @endsection

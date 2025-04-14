@@ -349,7 +349,7 @@
                         </a>
                     </div>
                     <p class="mt-8 text-base text-gray-400 md:mt-0 md:order-1">
-                        &copy; 2023 Échange d'Électricité. Tous droits réservés.
+                        &copy; 2025 Échange d'Électricité. Tous droits réservés.
                     </p>
                 </div>
             </div>

@@ -51,8 +51,7 @@ Route::post('/register', [AuthWebController::class, 'register']);
     Route::get('/chat', [ChatController::class, 'chatcenter'])->name('chatcenter');
     Route::get('/chat/user/{id}', [ChatController::class, 'chatcenter'])->name('chat.with');
     Route::post('/chat/{id}', [ChatController::class, 'send'])->name('chat.send');
-
-
+    Route::delete('/chat/message/{id}', [ChatController::class, 'destroy'])->name('chat.destroy');
 
     // Compteur et Solde
     Route::get('/compteur', [WebController::class, 'compteur'])->name('compteur');  

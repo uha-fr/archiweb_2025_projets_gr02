@@ -34,38 +34,53 @@ class ChatController extends Controller
         return back();
     }
 
-public function chatcenter($id = null)
-{
-    $user = Auth::user();
-
-    // Récupérer toutes les conversations 
-    $conversations = Message::where('sender_id', $user->id)
-        ->orWhere('receiver_id', $user->id)
-        ->with(['sender', 'receiver'])
-        ->get()
-        ->map(function ($message) use ($user) {
-            return $message->sender_id === $user->id ? $message->receiver : $message->sender;
-        })
-        ->unique('id')
-        ->values();
-
-    $messages = [];
-    $receiver = null;
-
-    if ($id) 
+    public function destroy($id)
     {
-        $receiver = User::findOrFail($id);
-        $messages = Message::where(function ($q) use ($user, $receiver) {
-            $q->where('sender_id', $user->id)->where('receiver_id', $receiver->id);
-        })->orWhere(function ($q) use ($user, $receiver) {
-            $q->where('sender_id', $receiver->id)->where('receiver_id', $user->id);
-        })->get();
+        $message = Message::findOrFail($id);
+
+        // Vérifie que seul l'auteur peut supprimer
+        if ($message->sender_id !== Auth::id()) {
+            abort(403, 'Non autorisé');
+        }
+
+        $message->delete();
+
+        return back()->with('success', 'Message supprimé');
     }
 
-    $users = $conversations;
 
-    return view('chatcenter', compact('user', 'conversations', 'messages', 'receiver', 'users'));
-}
+    public function chatcenter($id = null)
+    {
+        $user = Auth::user();
+
+        // Récupérer toutes les conversations 
+        $conversations = Message::where('sender_id', $user->id)
+            ->orWhere('receiver_id', $user->id)
+            ->with(['sender', 'receiver'])
+            ->get()
+            ->map(function ($message) use ($user) {
+                return $message->sender_id === $user->id ? $message->receiver : $message->sender;
+            })
+            ->unique('id')
+            ->values();
+
+        $messages = [];
+        $receiver = null;
+
+        if ($id) 
+        {
+            $receiver = User::findOrFail($id);
+            $messages = Message::where(function ($q) use ($user, $receiver) {
+                $q->where('sender_id', $user->id)->where('receiver_id', $receiver->id);
+            })->orWhere(function ($q) use ($user, $receiver) {
+                $q->where('sender_id', $receiver->id)->where('receiver_id', $user->id);
+            })->get();
+        }
+
+        $users = $conversations;
+
+        return view('chatcenter', compact('user', 'conversations', 'messages', 'receiver', 'users'));
+    }
 
 
 

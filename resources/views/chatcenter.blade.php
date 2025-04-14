@@ -26,10 +26,41 @@
                 @foreach ($messages as $message)
                     @php $isMe = $message->sender_id === Auth::id(); @endphp
                     <div class="flex {{ $isMe ? 'justify-end' : 'justify-start' }}">
+                        <div class="flex items-center group {{ $isMe ? 'justify-end' : 'justify-start' }} relative">
+                        {{-- 3 points visibles seulement au hover --}}
+                        @if ($isMe)
+                            <div class="mr-2">
+                                <button onclick="toggleMenu('menu-{{ $message->id }}')" 
+                                        class="text-gray-500 hover:text-gray-700 hidden group-hover:block focus:outline-none">
+                                    &#8942;
+                                </button>
+                    
+                                {{-- Menu  --}}
+                                <div id="menu-{{ $message->id }}" 
+                                     class="absolute z-10 mt-2 w-28 bg-white shadow-md rounded-md hidden">
+                                    <form method="POST" action="{{ route('chat.destroy', $message->id) }}" 
+                                          onsubmit="return confirm('Supprimer ce message ?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-500">
+                                            Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endif
+                    
+                        {{-- Bulle du message --}}
                         <div class="max-w-xs px-4 py-2 rounded-2xl shadow 
-                                    {{ $isMe ? 'bg-green-500 text-white rounded-br-none' : 'bg-gray-200 text-gray-900 rounded-bl-none' }}">
+                            {{ $isMe ? 'bg-green-500 text-white rounded-br-none' : 'bg-gray-200 text-gray-900 rounded-bl-none' }}">
                             <p class="text-sm">{{ $message->content }}</p>
                         </div>
+                    </div>
+                    
+                    
+
+
                     </div>
                 @endforeach
             </div>
@@ -57,4 +88,31 @@
         if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
     };
 </script>
+
+
+</script>
+<script>
+    function toggleMenu(id) {
+        const menu = document.getElementById(id);
+        // Ferme tous les autres menus ouverts
+        document.querySelectorAll('[id^="menu-"]').forEach(el => {
+            if (el.id !== id) el.classList.add('hidden');
+        });
+
+        menu.classList.toggle('hidden');
+    }
+
+    // Fermer le menu si on clique en dehors
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest('button') && !event.target.closest('[id^="menu-"]')) {
+            document.querySelectorAll('[id^="menu-"]').forEach(el => {
+                el.classList.add('hidden');
+            });
+        }
+    });
+</script>
+
+
+
+
 @endsection

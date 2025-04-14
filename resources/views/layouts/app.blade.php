@@ -130,14 +130,6 @@
                                     <form id="mark-as-read-{{ $notification->id }}" action="{{ route('notifications.mark-read', $notification->id) }}" method="POST" style="display: none;">
                                         @csrf
                                     </form>
-
-                                    <!-- Bouton pour marquer la notification comme lue -->
-                                    <form method="POST" action="{{ route('notifications.mark-read', $notification->id) }}">
-                                        @csrf
-                                        <button type="submit" class="text-xs text-blue-600 hover:bg-gray-100">
-                                            Marquer comme lu
-                                        </button>
-                                    </form>
                                 @empty
                                     <div class="px-4 py-2 text-sm text-gray-500">
                                         Aucune notification

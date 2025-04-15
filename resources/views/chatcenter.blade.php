@@ -23,46 +23,51 @@
             </div>
 
             <div id="chat-box" class="flex-1 overflow-y-auto px-4 py-6 space-y-2 bg-gray-50">
-                @foreach ($messages as $message)
-                    @php $isMe = $message->sender_id === Auth::id(); @endphp
-                    <div class="flex {{ $isMe ? 'justify-end' : 'justify-start' }}">
-                        <div class="flex items-center group {{ $isMe ? 'justify-end' : 'justify-start' }} relative">
-                        {{-- 3 points visibles seulement au hover --}}
-                        @if ($isMe)
-                            <div class="mr-2">
-                                <button onclick="toggleMenu('menu-{{ $message->id }}')" 
-                                        class="text-gray-500 hover:text-gray-700 hidden group-hover:block focus:outline-none">
-                                    &#8942;
-                                </button>
+                {{-- sticky date --}}
+                <div id="sticky-date" class="sticky top-0 z-10 rounded-xl bg-gray-100 text-center py-1 text-sm text-gray-600 shadow-sm max-w-20 opacity-70 mx-auto">
+                </div>
+                                
+             
                     
-                                {{-- Menu  --}}
-                                <div id="menu-{{ $message->id }}" 
-                                     class="absolute z-10 mt-2 w-28 bg-white shadow-md rounded-md hidden">
-                                    <form method="POST" action="{{ route('chat.destroy', $message->id) }}" 
-                                          onsubmit="return confirm('Supprimer ce message ?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-500">
-                                            Supprimer
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        @endif
-                    
-                        {{-- Bulle du message --}}
-                        <div class="max-w-xs px-4 py-2 rounded-2xl shadow 
-                            {{ $isMe ? 'bg-green-500 text-white rounded-br-none' : 'bg-gray-200 text-gray-900 rounded-bl-none' }}">
-                            <p class="text-sm">{{ $message->content }}</p>
-                        </div>
+                @php
+                $lastDate = null;
+            @endphp
+            
+            @foreach ($messages as $message)
+                @php
+                    $currentDate = $message->created_at->format('Y-m-d');
+                    $formattedDate = \Carbon\Carbon::parse($currentDate)->isToday() ? 'Today' :
+                                     (\Carbon\Carbon::parse($currentDate)->isYesterday() ? 'Yesterday' :
+                                     \Carbon\Carbon::parse($currentDate)->translatedFormat('F j'));
+                @endphp
+            
+                @if ($lastDate !== $currentDate)
+                    @if ($lastDate !== null)
+                        </div> 
+                    @endif
+            
+                    <div class="date-group" data-date="{{ $formattedDate }}">
+                @endif
+            
+                @php $lastDate = $currentDate; @endphp
+            
+                {{-- Message --}}
+                <div class="flex  mb-2  {{ $message->sender_id === Auth::id() ? 'justify-end' : 'justify-start' }}">
+                    <div class="max-w-xs px-4 py-2 rounded-2xl shadow 
+                        {{ $message->sender_id === Auth::id() ? 'bg-green-500 text-white rounded-br-none' : 'bg-gray-200 text-gray-900 rounded-bl-none' }}">
+                        <p class="text-sm">{{ $message->content }}</p>
+                        <p class="text-[10px] mt-1 text-right opacity-70">
+                            {{ \Carbon\Carbon::parse($message->created_at)->format('H:i') }}
+                        </p>
                     </div>
-                    
-                    
+                </div>
+            @endforeach
+            
+            </div>
+            
 
 
-                    </div>
-                @endforeach
+                 
             </div>
 
             <form method="POST" action="{{ route('chat.send', $receiver->id) }}" class="flex items-center gap-2 border-t px-4 py-3">
@@ -109,6 +114,26 @@
                 el.classList.add('hidden');
             });
         }
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dateGroups = document.querySelectorAll('.date-group');
+        const stickyDate = document.getElementById('sticky-date');
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const date = entry.target.getAttribute('data-date');
+                    stickyDate.textContent = date;
+                }
+            });
+        }, {
+            root: document.getElementById('chat-box'),
+            threshold: 0.5
+        });
+
+        dateGroups.forEach(group => observer.observe(group));
     });
 </script>
 

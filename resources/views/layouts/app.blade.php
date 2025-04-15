@@ -112,13 +112,10 @@
                             <!-- Dropdown -->
                             <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                                 @forelse($notifications as $notification)
-                                    <a href="{{ 
-                                        $notification->data['type'] === 'message' 
-                                        ? $notification->data['route'] 
-                                        : '#' 
-                                    }}" 
-                                    class="block px-4 py-2 text-sm text-gray-700 border-b hover:bg-gray-50"
-                                    onclick="event.preventDefault(); document.getElementById('mark-as-read-{{ $notification->id }}').submit();">
+                                <a href="#"
+                                class="block px-4 py-2 text-sm text-gray-700 border-b hover:bg-gray-50"
+                                onclick="event.preventDefault(); markAsReadAndRedirect('{{ $notification->id }}', '{{ $notification->data['type'] === 'message' ? $notification->data['route'] : route('contracts.pending') }}')">                             
+
                                         @if ($notification->data['type'] === 'message')
                                             Vous avez reçu un message de <strong>{{ $notification->data['sender_name'] }}</strong>
                                         @elseif($notification->data['type']==='contract')
@@ -136,15 +133,8 @@
                                     </div>
                                 @endforelse
                             </div>
-                            
-                       
-
                          </div>
-
-
-
-
-                            @endauth
+                        @endauth
                         </div>
                     </div>
                     <div class="hidden sm:ml-6 sm:flex sm:items-center">
@@ -361,6 +351,20 @@
             }
         });
     </script>
+    <script>
+        function markAsReadAndRedirect(notificationId, redirectUrl) {
+            const form = document.getElementById('mark-as-read-' + notificationId);
+            if (form) {
+                form.submit();
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 200);
+            } else {
+                window.location.href = redirectUrl;
+            }
+        }
+    </script>
+    
 </body>
 </html>
 

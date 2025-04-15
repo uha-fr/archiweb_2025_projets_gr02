@@ -29,7 +29,7 @@ class NewMessageNotification extends Notification
             'type' => 'message', 
             'sender_id' => $this->message->sender_id,
             'sender_name' => $this->message->sender->name,
-            'route' => route('chatcenter', ['id' => $this->message->sender->id]), 
+            'route' => route('chat.with', ['id' => $this->message->sender->id]),
         ];
     }
 }

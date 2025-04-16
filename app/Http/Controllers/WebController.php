@@ -431,6 +431,28 @@ public function transactionsSolde()
     
     return view('transactions.solde', compact('transactions'));
 }
+// recharge Compteur et Portefeuille
+public function showCompteurForm() {
+    return view('recharge.compteur');
+}
+
+public function rechargerCompteur(Request $request) {
+    $request->validate(['montant' => 'required|numeric|min:0.01']);
+    auth()->user()->increment('kwh_balance', $request->montant);
+    return redirect()->route('dashboard')->with('success', 'Votre compteur a été rechargé avec succès.');
+}
+
+public function showPortefeuilleForm() {
+    return view('recharge.portefeuille');
+}
+
+public function rechargerPortefeuille(Request $request) {
+    $request->validate(['montant' => 'required|numeric|min:0.01']);
+    auth()->user()->increment('wallet_balance', $request->montant);
+    return redirect()->route('dashboard')->with('success', 'Votre portefeuille a été rechargé avec succès.');
+}
+
+
 
 /**
  * Refuser un contrat en attente.

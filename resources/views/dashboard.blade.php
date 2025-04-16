@@ -60,8 +60,8 @@
                 </div>
                 <div class="bg-gray-50 px-4 py-4 sm:px-6">
                     <div class="text-sm">
-                        <a href="{{ route('transactions.index') }}" class="font-medium text-primary-600 hover:text-primary-500">
-                            Voir les transactions
+                        <a href="{{ route('recharge.compteur') }}" class="font-medium text-primary-600 hover:text-primary-500">
+                            Recharger mon compteur
                         </a>
                     </div>
                 </div>
@@ -89,8 +89,8 @@
                 </div>
                 <div class="bg-gray-50 px-4 py-4 sm:px-6">
                     <div class="text-sm">
-                        <a href="{{ route('transactions.index') }}" class="font-medium text-primary-600 hover:text-primary-500">
-                            Voir les paiements
+                        <a href="{{ route('recharge.portefeuille') }}" class="font-medium text-primary-600 hover:text-primary-500">
+                            Recharger mon portefeuille
                         </a>
                     </div>
                 </div>

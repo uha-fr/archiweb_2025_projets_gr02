@@ -53,10 +53,16 @@ Route::post('/register', [AuthWebController::class, 'register']);
     Route::post('/chat/{id}', [ChatController::class, 'send'])->name('chat.send');
     Route::delete('/chat/message/{id}', [ChatController::class, 'destroy'])->name('chat.destroy');
 
-    // Compteur et Solde
+    // Affiger Compteur et Solde
     Route::get('/compteur', [WebController::class, 'compteur'])->name('compteur');  
     Route::get('/solde', [WebController::class, 'solde'])->name('solde');
-    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+   
+    // Recharge Compteur et Portefeuille
+    Route::get('/recharge/compteur', [WebController::class, 'showCompteurForm'])->name('recharge.compteur.form');
+    Route::post('/recharge/compteur', [WebController::class, 'rechargerCompteur'])->name('recharge.compteur');
+    Route::get('/recharge/portefeuille', [WebController::class, 'showPortefeuilleForm'])->name('recharge.portefeuille.form');
+    Route::post('/recharge/portefeuille', [WebController::class, 'rechargerPortefeuille'])->name('recharge.portefeuille');
+
     
     // Profil
     Route::get('/profile', [WebController::class, 'profile'])->name('profile');
